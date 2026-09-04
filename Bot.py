@@ -3,6 +3,8 @@ from discord.ext import commands
 import urllib.request
 import urllib.parse
 import os
+import socket
+socket.setdefaulttimeout(120)
 
 # ضع التوكن هنا
 TOKEN = os.getenv('DISCORD_TOKEN')
