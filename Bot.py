@@ -6,6 +6,7 @@ import os
 
 # قراءة التوكن من متغيرات Railway
 TOKEN = os.getenv('DISCORD_TOKEN')
+STABILITY_API_KEY = os.getenv('STABILITY_API_KEY')
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -16,40 +17,29 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print(f'تم تشغيل البوت: {bot.user}')
 
-# قائمة ذكية بالمعالم السياحية للدول
-country_landmarks = {
-    "egypt": "The Great Pyramids of Giza and the Sphinx, ancient Egyptian architecture, golden sand dunes, dramatic sunset lighting",
-    "turkey": "The Hagia Sophia and Blue Mosque in Istanbul, Ottoman architecture, beautiful Bosphorus view",
-    "japan": "Mount Fuji, cherry blossom trees, traditional Japanese temples, spring season",
-    "france": "The Eiffel Tower in Paris, beautiful cityscape, romantic atmosphere",
-    "saudi arabia": "The Kaaba in Mecca, beautiful Islamic architecture, desert landscapes",
-    "usa": "The Statue of Liberty in New York, cityscape, skyscrapers",
-    "uk": "Big Ben and the Tower of London, beautiful historic architecture",
-    "italy": "The Colosseum in Rome, beautiful historic architecture, Mediterranean atmosphere",
-    "china": "The Great Wall of China, beautiful mountains, ancient architecture",
-    "qatar": "The skyline of Doha, modern architecture, stunning sunset",
-    "uae": "The Burj Khalifa in Dubai, modern cityscape, desert landscape",
-    "germany": "The Brandenburg Gate, historic architecture, beautiful cityscape",
-    "india": "The Taj Mahal, beautiful marble architecture, warm sunset",
-    "jordan": "The ancient city of Petra, carved rock architecture, desert canyon",
-    "palestine": "The Al-Aqsa Mosque in Jerusalem, golden dome, beautiful Palestinian landscape, olive trees, warm sunset"
-}
-
 # دالة مساعدة لرسم الصور
-async def generate_image(ctx, prompt, extra_style=""):
+async def generate_image(ctx, prompt):
     msg = await ctx.send(f'⏳ جاري رسم: {prompt}...')
     
     try:
-        full_prompt = f"{prompt}, {extra_style}, photorealistic, ultra realistic, 8k resolution, highly detailed, sharp focus, cinematic lighting, professional photography, depth of field, dramatic shadows"
+        # استخدام خدمة Stability AI
+        url = "https://api.stability.ai/v2beta/stable-image/generate/core"
+        data = urllib.parse.urlencode({
+            "prompt": prompt,
+            "aspect_ratio": "3:2"
+        }).encode()
         
-        url = f'https://image.pollinations.ai/prompt/{urllib.parse.quote(full_prompt)}?width=1024&height=1024&nologo=true'
+        req = urllib.request.Request(url, data=data, headers={
+            "Authorization": f"Bearer {STABILITY_API_KEY}",
+            "Content-Type": "application/x-www-form-urlencoded",
+            "Accept": "image/*"
+        })
         
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=120) as response:
-            data = response.read()
+        with urllib.request.urlopen(req, timeout=180) as response:
+            image_data = response.read()
         
         with open('generated_image.png', 'wb') as f:
-            f.write(data)
+            f.write(image_data)
         
         await msg.delete()
         await ctx.send(file=discord.File('generated_image.png'))
@@ -70,9 +60,9 @@ async def draw(ctx, *args):
 # أمر رسم فلسطين
 @bot.command()
 async def palestine(ctx):
-    await generate_image(ctx, country_landmarks["palestine"])
+    await generate_image(ctx, "The Al-Aqsa Mosque in Jerusalem, golden dome, beautiful Palestinian landscape, ancient stone walls, olive trees, warm sunset lighting, breathtaking view")
 
-# أمر رسم الدول (مع القائمة الذكية)
+# أمر رسم الدول
 @bot.command()
 async def country(ctx, *args):
     if not args:
@@ -84,7 +74,6 @@ async def country(ctx, *args):
     if country_name in country_landmarks:
         await generate_image(ctx, country_landmarks[country_name])
     else:
-        # إذا لم تكن الدولة في القائمة، ارسم وصف عام
         await generate_image(ctx, f"The most beautiful landmarks and iconic scenery of {country_name}, famous tourist attractions, beautiful view, cultural heritage")
 
 # أوامر مختصرة واحترافية
@@ -124,14 +113,14 @@ async def commands(ctx):
     help_text = """
 **📜 قائمة أوامر البوت:**
 • `!palestine` : رسم المسجد الأقصى وفلسطين
-• `!country [اسم الدولة]` : رسم معالم أي دولة (بوصف دقيق)
-• `!draw [وصف]` : رسم أي شيء تريده (واقعي)
-• `!portrait [وصف]` : رسم بورتريه شخصي واقعي
-• `!landscape [وصف]` : رسم منظر طبيعي واقعي
-• `!animal [وصف]` : رسم حيوان واقعي
-• `!city [وصف]` : رسم مدينة واقعية
-• `!car [وصف]` : رسم سيارة واقعية
-• `!space [وصف]` : رسم الفضاء الخارجي
+• `!country [اسم الدولة]` : رسم معالم أي دولة
+• `!draw [وصف]` : رسم أي شيء تريده
+• `!portrait [وصف]` : رسم بورتريه شخصي
+• `!landscape [وصف]` : رسم منظر طبيعي
+• `!animal [وصف]` : رسم حيوان
+• `!city [وصف]` : رسم مدينة
+• `!car [وصف]` : رسم سيارة
+• `!space [وصف]` : رسم الفضاء
 • `!ping` : اختبار اتصال البوت
     """
     await ctx.send(help_text)
