@@ -20,24 +20,16 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print(f'تم تشغيل البوت: {bot.user}')
 
-# قائمة ذكية بالمعالم السياحية للدول
-country_landmarks = {
-    "egypt": "The Great Pyramids of Giza and the Sphinx, ancient Egyptian architecture, golden sand dunes, dramatic sunset lighting",
-    "turkey": "The Hagia Sophia and Blue Mosque in Istanbul, Ottoman architecture, beautiful Bosphorus view",
-    "japan": "Mount Fuji, cherry blossom trees, traditional Japanese temples, spring season",
-    "france": "The Eiffel Tower in Paris, beautiful cityscape, romantic atmosphere",
-    "saudi arabia": "The Kaaba in Mecca, beautiful Islamic architecture, desert landscapes",
-    "usa": "The Statue of Liberty in New York, cityscape, skyscrapers",
-    "uk": "Big Ben and the Tower of London, beautiful historic architecture",
-    "italy": "The Colosseum in Rome, beautiful historic architecture, Mediterranean atmosphere",
-    "china": "The Great Wall of China, beautiful mountains, ancient architecture",
-    "qatar": "The skyline of Doha, modern architecture, stunning sunset",
-    "uae": "The Burj Khalifa in Dubai, modern cityscape, desert landscape",
-    "germany": "The Brandenburg Gate, historic architecture, beautiful cityscape",
-    "india": "The Taj Mahal, beautiful marble architecture, warm sunset",
-    "jordan": "The ancient city of Petra, carved rock architecture, desert canyon",
-    "palestine": "The Al-Aqsa Mosque in Jerusalem, golden dome, beautiful Palestinian landscape, olive trees, warm sunset"
-}
+# دالة ترجمة النصوص (أي لغة)
+async def translate_text(text):
+    try:
+        url = f"https://api.mymemory.translated.net/get?q={urllib.parse.quote(text)}&langpair=en|ar"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=30) as response:
+            data = json.loads(response.read())
+            return data['responseData']['translatedText']
+    except Exception:
+        return "عذراً، لم أستطع ترجمة هذا النص."
 
 # دالة مساعدة لرسم الصور
 async def generate_image(ctx, prompt, extra_style=""):
@@ -75,7 +67,7 @@ async def ai_reply(prompt):
 # الترحيب بالأعضاء الجدد
 @bot.event
 async def on_member_join(member):
-    channel = discord.utils.get(member.guild.channels, name='welcome')  # غيّر الاسم إلى 'welcome'
+    channel = discord.utils.get(member.guild.channels, name='welcome')
     if channel:
         await channel.send(f"🎉 مرحباً بك يا {member.mention} في السيرفر! نتمنى لك وقتاً ممتعاً!")
 
@@ -330,6 +322,14 @@ async def translate(ctx, *args):
         await ctx.send("عذراً، لم أستطع ترجمة هذه الكلمة")
 
 @bot.command()
+async def translateparagraph(ctx, *, text):
+    if not text:
+        await ctx.send('الرجاء كتابة الفقرة التي تريد ترجمتها. مثال: !translateparagraph This is a beautiful day')
+        return
+    translated = await translate_text(text)
+    await ctx.send(f"🌐 الترجمة:\n{translated}")
+
+@bot.command()
 async def avatar(ctx, member: discord.Member = None):
     if member is None:
         member = ctx.author
@@ -378,7 +378,6 @@ async def exchange(ctx, *args):
 # أمر إنشاء رابط الدعوة
 @bot.command()
 async def invite(ctx):
-    # إنشاء رابط دعوة للسيرفر
     try:
         invite_link = await ctx.channel.create_invite(max_age=0, max_uses=0, reason="دعوة أعضاء جدد")
         await ctx.send(f"🔗 رابط الدعوة:\n{invite_link}")
@@ -393,6 +392,7 @@ async def commands(ctx):
 **🤖 الذكاء الاصطناعي:**
 • `!ask [سؤال]` : الرد الذكي على الأسئلة
 • `!translate [كلمة]` : ترجمة كلمة
+• `!translateparagraph [فقرة]` : ترجمة فقرة كاملة
 
 **🌤️ الطقس والعملات:**
 • `!weather [مدينة]` : معرفة حالة الطقس
