@@ -210,11 +210,11 @@ async def quote(ctx):
     ]
     await ctx.send(random.choice(quotes))
 
-# أوامر الميزات الجديدة
+# أوامر الميزات الجديدة (محسنة)
 @bot.command()
 async def weather(ctx, *args):
     if not args:
-        await ctx.send('الرجاء كتابة اسم المدينة. مثال: !weather Sanaa')
+        await ctx.send('الرجاء كتابة اسم المدينة باللغة الإنجليزية. مثال: !weather Dubai')
         return
     city = ' '.join(args)
     try:
@@ -283,7 +283,7 @@ async def commands(ctx):
     help_text = """
 **📜 قائمة أوامر البوت:**
 • `!ask [سؤال]` : الرد الذكي على الأسئلة
-• `!weather [مدينة]` : معرفة حالة الطقس
+• `!weather [مدينة]` : معرفة حالة الطقس (بالإنجليزية)
 • `!gif [وصف]` : إرسال صورة متحركة
 • `!calc [عملية]` : آلة حاسبة
 • `!time` : معرفة الوقت الحالي
