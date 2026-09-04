@@ -6,7 +6,6 @@ import os
 import random
 import json
 from datetime import datetime
-from datetime import timedelta
 
 # قراءة التوكن من متغيرات Railway
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -76,7 +75,7 @@ async def ai_reply(prompt):
 # الترحيب بالأعضاء الجدد
 @bot.event
 async def on_member_join(member):
-    channel = discord.utils.get(member.guild.channels, name='general')
+    channel = discord.utils.get(member.guild.channels, name='welcome')  # غيّر الاسم إلى 'welcome'
     if channel:
         await channel.send(f"🎉 مرحباً بك يا {member.mention} في السيرفر! نتمنى لك وقتاً ممتعاً!")
 
@@ -297,19 +296,16 @@ async def meme(ctx):
 # أوامر إضافية جديدة (سوبر)
 @bot.command()
 async def roll(ctx):
-    # رمي النرد
     result = random.randint(1, 6)
     await ctx.send(f"🎲 النرد: {result}")
 
 @bot.command()
 async def flip(ctx):
-    # رمي العملة
     result = random.choice(["وجه", "كتابة"])
     await ctx.send(f"🪙 النتيجة: {result}")
 
 @bot.command()
 async def choose(ctx, *args):
-    # اختيار عشوائي
     if not args:
         await ctx.send('الرجاء كتابة الخيارات. مثال: !choose بيتزا برجر')
         return
@@ -319,7 +315,6 @@ async def choose(ctx, *args):
 
 @bot.command()
 async def translate(ctx, *args):
-    # ترجمة
     if not args:
         await ctx.send('الرجاء كتابة الكلمة. مثال: !translate hello')
         return
@@ -336,27 +331,23 @@ async def translate(ctx, *args):
 
 @bot.command()
 async def avatar(ctx, member: discord.Member = None):
-    # عرض صورة البروفايل
     if member is None:
         member = ctx.author
     await ctx.send(member.avatar.url)
 
 @bot.command()
 async def serverinfo(ctx):
-    # معلومات السيرفر
     guild = ctx.guild
     await ctx.send(f"📊 معلومات السيرفر:\n👥 الأعضاء: {guild.member_count}\n🏷️ الاسم: {guild.name}")
 
 @bot.command()
 async def userinfo(ctx, member: discord.Member = None):
-    # معلومات المستخدم
     if member is None:
         member = ctx.author
     await ctx.send(f"👤 معلومات المستخدم:\n📛 الاسم: {member.name}\n🆔 المعرف: {member.id}\n📅 تاريخ الانضمام: {member.joined_at}")
 
 @bot.command()
 async def news(ctx):
-    # أخبار عاجلة (بسيطة)
     try:
         url = f"https://api.spaceflightnewsapi.net/v4/articles/?limit=1"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
@@ -370,7 +361,6 @@ async def news(ctx):
 
 @bot.command()
 async def exchange(ctx, *args):
-    # أسعار صرف العملات
     if not args:
         await ctx.send('الرجاء كتابة العملة. مثال: !exchange USD')
         return
@@ -384,6 +374,16 @@ async def exchange(ctx, *args):
             await ctx.send(f"💱 سعر صرف {currency}:\n🇺🇸 الدولار: {rates.get('USD', 'غير متوفر')}\n🇸🇦 الريال: {rates.get('SAR', 'غير متوفر')}\n🇪🇬 الجنيه: {rates.get('EGP', 'غير متوفر')}")
     except Exception:
         await ctx.send("عذراً، لم أستطع معرفة أسعار الصرف")
+
+# أمر إنشاء رابط الدعوة
+@bot.command()
+async def invite(ctx):
+    # إنشاء رابط دعوة للسيرفر
+    try:
+        invite_link = await ctx.channel.create_invite(max_age=0, max_uses=0, reason="دعوة أعضاء جدد")
+        await ctx.send(f"🔗 رابط الدعوة:\n{invite_link}")
+    except Exception:
+        await ctx.send("عذراً، لم أستطع إنشاء رابط الدعوة (تأكد من الصلاحيات)")
 
 # أمر المساعدة
 @bot.command()
@@ -433,6 +433,7 @@ async def commands(ctx):
 • `!ocean [وصف]` : رسم محيط
 
 **🧮 أدوات:**
+• `!invite` : إنشاء رابط دعوة
 • `!calc [عملية]` : آلة حاسبة
 • `!ping` : اختبار اتصال البوت
     """
