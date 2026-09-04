@@ -6,6 +6,7 @@ import os
 import random
 import json
 from datetime import datetime
+from datetime import timedelta
 
 # قراءة التوكن من متغيرات Railway
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -210,7 +211,7 @@ async def quote(ctx):
     ]
     await ctx.send(random.choice(quotes))
 
-# أمر الطقس
+# أوامر الميزات الجديدة (محسنة)
 @bot.command()
 async def weather(ctx, *args):
     if not args:
@@ -218,8 +219,6 @@ async def weather(ctx, *args):
         return
     city = ' '.join(args)
     try:
-        # استخدام خدمة Open-Meteo للطقس (أكثر دقة وموثوقية)
-        # أولاً: البحث عن إحداثيات المدينة
         geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={urllib.parse.quote(city)}&count=1&language=ar&format=json"
         geo_req = urllib.request.Request(geo_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(geo_req, timeout=15) as response:
@@ -232,7 +231,6 @@ async def weather(ctx, *args):
         latitude = geo_data['results'][0]['latitude']
         longitude = geo_data['results'][0]['longitude']
         
-        # ثانياً: الحصول على الطقس
         weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true"
         weather_req = urllib.request.Request(weather_url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(weather_req, timeout=15) as response:
@@ -246,7 +244,6 @@ async def weather(ctx, *args):
     except Exception as e:
         await ctx.send(f"عذراً، لم أستطع معرفة الطقس في {city}")
 
-# أوامر إضافية
 @bot.command()
 async def gif(ctx, *args):
     if not args:
@@ -297,19 +294,127 @@ async def meme(ctx):
     except Exception:
         await ctx.send("حدث خطأ أثناء البحث عن ميم")
 
+# أوامر إضافية جديدة (سوبر)
+@bot.command()
+async def roll(ctx):
+    # رمي النرد
+    result = random.randint(1, 6)
+    await ctx.send(f"🎲 النرد: {result}")
+
+@bot.command()
+async def flip(ctx):
+    # رمي العملة
+    result = random.choice(["وجه", "كتابة"])
+    await ctx.send(f"🪙 النتيجة: {result}")
+
+@bot.command()
+async def choose(ctx, *args):
+    # اختيار عشوائي
+    if not args:
+        await ctx.send('الرجاء كتابة الخيارات. مثال: !choose بيتزا برجر')
+        return
+    options = ' '.join(args).split()
+    result = random.choice(options)
+    await ctx.send(f"🤔 اخترت: {result}")
+
+@bot.command()
+async def translate(ctx, *args):
+    # ترجمة
+    if not args:
+        await ctx.send('الرجاء كتابة الكلمة. مثال: !translate hello')
+        return
+    word = ' '.join(args)
+    try:
+        url = f"https://api.mymemory.translated.net/get?q={urllib.parse.quote(word)}&langpair=en|ar"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            data = json.loads(response.read())
+            translated = data['responseData']['translatedText']
+        await ctx.send(f"🌐 الترجمة: {translated}")
+    except Exception:
+        await ctx.send("عذراً، لم أستطع ترجمة هذه الكلمة")
+
+@bot.command()
+async def avatar(ctx, member: discord.Member = None):
+    # عرض صورة البروفايل
+    if member is None:
+        member = ctx.author
+    await ctx.send(member.avatar.url)
+
+@bot.command()
+async def serverinfo(ctx):
+    # معلومات السيرفر
+    guild = ctx.guild
+    await ctx.send(f"📊 معلومات السيرفر:\n👥 الأعضاء: {guild.member_count}\n🏷️ الاسم: {guild.name}")
+
+@bot.command()
+async def userinfo(ctx, member: discord.Member = None):
+    # معلومات المستخدم
+    if member is None:
+        member = ctx.author
+    await ctx.send(f"👤 معلومات المستخدم:\n📛 الاسم: {member.name}\n🆔 المعرف: {member.id}\n📅 تاريخ الانضمام: {member.joined_at}")
+
+@bot.command()
+async def news(ctx):
+    # أخبار عاجلة (بسيطة)
+    try:
+        url = f"https://api.spaceflightnewsapi.net/v4/articles/?limit=1"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            data = json.loads(response.read())
+            title = data['results'][0]['title']
+            link = data['results'][0]['url']
+        await ctx.send(f"📰 خبر عاجل:\n{title}\n{link}")
+    except Exception:
+        await ctx.send("عذراً، لم أستطع قراءة الأخبار")
+
+@bot.command()
+async def exchange(ctx, *args):
+    # أسعار صرف العملات
+    if not args:
+        await ctx.send('الرجاء كتابة العملة. مثال: !exchange USD')
+        return
+    currency = args[0].upper()
+    try:
+        url = f"https://api.exchangerate-api.com/v4/latest/{currency}"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            data = json.loads(response.read())
+            rates = data['rates']
+            await ctx.send(f"💱 سعر صرف {currency}:\n🇺🇸 الدولار: {rates.get('USD', 'غير متوفر')}\n🇸🇦 الريال: {rates.get('SAR', 'غير متوفر')}\n🇪🇬 الجنيه: {rates.get('EGP', 'غير متوفر')}")
+    except Exception:
+        await ctx.send("عذراً، لم أستطع معرفة أسعار الصرف")
+
 # أمر المساعدة
 @bot.command()
 async def commands(ctx):
     help_text = """
-**📜 قائمة أوامر البوت:**
+**📜 قائمة أوامر البوت (الأسطورية):**
+**🤖 الذكاء الاصطناعي:**
 • `!ask [سؤال]` : الرد الذكي على الأسئلة
-• `!weather [مدينة]` : معرفة حالة الطقس (بالإنجليزية)
-• `!gif [وصف]` : إرسال صورة متحركة
-• `!calc [عملية]` : آلة حاسبة
-• `!time` : معرفة الوقت الحالي
-• `!meme` : إرسال ميم عشوائي
+• `!translate [كلمة]` : ترجمة كلمة
+
+**🌤️ الطقس والعملات:**
+• `!weather [مدينة]` : معرفة حالة الطقس
+• `!exchange [عملة]` : أسعار صرف العملات
+
+**🎲 ألعاب وترفيه:**
 • `!joke` : إرسال نكتة عشوائية
 • `!quote` : إرسال اقتباس عشوائي
+• `!meme` : إرسال ميم عشوائي
+• `!gif [وصف]` : إرسال صورة متحركة
+• `!roll` : رمي النرد
+• `!flip` : رمي العملة
+• `!choose [خيار1 خيار2]` : اختيار عشوائي
+
+**📊 معلومات:**
+• `!time` : معرفة الوقت الحالي
+• `!avatar` : عرض صورة البروفايل
+• `!serverinfo` : معلومات السيرفر
+• `!userinfo` : معلومات المستخدم
+• `!news` : أخبار عاجلة
+
+**🎨 الرسم (واقعي):**
 • `!palestine` : رسم المسجد الأقصى وفلسطين
 • `!country [اسم الدولة]` : رسم معالم أي دولة
 • `!draw [وصف]` : رسم أي شيء تريده
@@ -326,6 +431,9 @@ async def commands(ctx):
 • `!house [وصف]` : رسم منزل
 • `!nature [وصف]` : رسم طبيعة
 • `!ocean [وصف]` : رسم محيط
+
+**🧮 أدوات:**
+• `!calc [عملية]` : آلة حاسبة
 • `!ping` : اختبار اتصال البوت
     """
     await ctx.send(help_text)
