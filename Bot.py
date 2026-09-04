@@ -3,8 +3,6 @@ from discord.ext import commands
 import urllib.request
 import urllib.parse
 import os
-import socket
-socket.setdefaulttimeout(120)
 
 # ضع التوكن هنا
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -21,7 +19,7 @@ async def on_ready():
 @bot.command()
 async def draw(ctx, *args):
     if not args:
-        await ctx.send('الرجاء كتابة وصف الصورة. مثال: !draw a beautiful anime landscape')
+        await ctx.send('الرجاء كتابة وصف الصورة. مثال: !draw a realistic portrait of a person')
         return
 
     prompt = ' '.join(args) + ', photorealistic, ultra realistic, 8k resolution, highly detailed, sharp focus, cinematic lighting'
@@ -31,6 +29,7 @@ async def draw(ctx, *args):
 
     try:
         url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&nologo=true&model=flux'
+        
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=120) as response:
             data = response.read()
