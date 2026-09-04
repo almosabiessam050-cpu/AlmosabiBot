@@ -4,6 +4,8 @@ import urllib.request
 import urllib.parse
 import os
 import random
+import json
+from datetime import datetime
 
 # قراءة التوكن من متغيرات Railway
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -208,12 +210,84 @@ async def quote(ctx):
     ]
     await ctx.send(random.choice(quotes))
 
+# أوامر الميزات الجديدة
+@bot.command()
+async def weather(ctx, *args):
+    if not args:
+        await ctx.send('الرجاء كتابة اسم المدينة. مثال: !weather Sanaa')
+        return
+    city = ' '.join(args)
+    try:
+        url = f"https://wttr.in/{urllib.parse.quote(city)}?format=3"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            weather_info = response.read().decode()
+        await ctx.send(f"🌤️ {weather_info}")
+    except Exception:
+        await ctx.send(f"عذراً، لم أستطع معرفة الطقس في {city}")
+
+@bot.command()
+async def gif(ctx, *args):
+    if not args:
+        await ctx.send('الرجاء كتابة وصف الصورة المتحركة. مثال: !gif happy')
+        return
+    prompt = ' '.join(args)
+    try:
+        # استخدام خدمة مجانية للصور المتحركة
+        url = f"https://api.tenor.com/v1/search?q={urllib.parse.quote(prompt)}&key=LIVDSRZULELA&limit=1"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            data = json.loads(response.read())
+            if data['results']:
+                gif_url = data['results'][0]['media'][0]['gif']['url']
+                await ctx.send(gif_url)
+            else:
+                await ctx.send("لم أجد صورة متحركة مناسبة")
+    except Exception:
+        await ctx.send("حدث خطأ أثناء البحث عن الصورة المتحركة")
+
+@bot.command()
+async def calc(ctx, *args):
+    if not args:
+        await ctx.send('الرجاء كتابة العملية الحسابية. مثال: !calc 5+5')
+        return
+    try:
+        expression = ' '.join(args)
+        result = eval(expression)
+        await ctx.send(f"🧮 {expression} = {result}")
+    except Exception:
+        await ctx.send("عذراً، لم أستطع حساب هذه العملية")
+
+@bot.command()
+async def time(ctx):
+    now = datetime.now()
+    await ctx.send(f"🕐 الوقت الحالي هو: {now.strftime('%H:%M:%S')}")
+
+@bot.command()
+async def meme(ctx):
+    try:
+        url = "https://api.imgflip.com/get_memes"
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(req, timeout=15) as response:
+            data = json.loads(response.read())
+            memes = data['data']['memes']
+            meme = random.choice(memes)
+            meme_url = meme['url']
+            await ctx.send(meme_url)
+    except Exception:
+        await ctx.send("حدث خطأ أثناء البحث عن ميم")
+
 # أمر المساعدة
 @bot.command()
 async def commands(ctx):
     help_text = """
 **📜 قائمة أوامر البوت:**
 • `!ask [سؤال]` : الرد الذكي على الأسئلة
+• `!weather [مدينة]` : معرفة حالة الطقس
+• `!gif [وصف]` : إرسال صورة متحركة
+• `!calc [عملية]` : آلة حاسبة
+• `!time` : معرفة الوقت الحالي
+• `!meme` : إرسال ميم عشوائي
 • `!joke` : إرسال نكتة عشوائية
 • `!quote` : إرسال اقتباس عشوائي
 • `!palestine` : رسم المسجد الأقصى وفلسطين
