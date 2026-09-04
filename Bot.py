@@ -16,9 +16,24 @@ bot = commands.Bot(command_prefix='!', intents=intents)
 async def on_ready():
     print(f'تم تشغيل البوت: {bot.user}')
 
-@bot.command()
-async def ping(ctx):
-    await ctx.send('Pong!')
+# قائمة ذكية بالمعالم السياحية للدول
+country_landmarks = {
+    "egypt": "The Great Pyramids of Giza and the Sphinx, ancient Egyptian architecture, golden sand dunes, dramatic sunset lighting",
+    "turkey": "The Hagia Sophia and Blue Mosque in Istanbul, Ottoman architecture, beautiful Bosphorus view",
+    "japan": "Mount Fuji, cherry blossom trees, traditional Japanese temples, spring season",
+    "france": "The Eiffel Tower in Paris, beautiful cityscape, romantic atmosphere",
+    "saudi arabia": "The Kaaba in Mecca, beautiful Islamic architecture, desert landscapes",
+    "usa": "The Statue of Liberty in New York, cityscape, skyscrapers",
+    "uk": "Big Ben and the Tower of London, beautiful historic architecture",
+    "italy": "The Colosseum in Rome, beautiful historic architecture, Mediterranean atmosphere",
+    "china": "The Great Wall of China, beautiful mountains, ancient architecture",
+    "qatar": "The skyline of Doha, modern architecture, stunning sunset",
+    "uae": "The Burj Khalifa in Dubai, modern cityscape, desert landscape",
+    "germany": "The Brandenburg Gate, historic architecture, beautiful cityscape",
+    "india": "The Taj Mahal, beautiful marble architecture, warm sunset",
+    "jordan": "The ancient city of Petra, carved rock architecture, desert canyon",
+    "palestine": "The Al-Aqsa Mosque in Jerusalem, golden dome, beautiful Palestinian landscape, olive trees, warm sunset"
+}
 
 # دالة مساعدة لرسم الصور
 async def generate_image(ctx, prompt, extra_style=""):
@@ -55,17 +70,22 @@ async def draw(ctx, *args):
 # أمر رسم فلسطين
 @bot.command()
 async def palestine(ctx):
-    await generate_image(ctx, "The Al-Aqsa Mosque in Jerusalem, golden dome, beautiful Palestinian landscape, ancient stone walls, olive trees, warm sunset lighting, breathtaking view")
+    await generate_image(ctx, country_landmarks["palestine"])
 
-# أمر رسم الدول
+# أمر رسم الدول (مع القائمة الذكية)
 @bot.command()
 async def country(ctx, *args):
     if not args:
         await ctx.send('الرجاء كتابة اسم الدولة. مثال: !country Egypt')
         return
-    country_name = ' '.join(args)
-    prompt = f"The most beautiful landmarks and iconic scenery of {country_name}, famous tourist attractions, beautiful view, cultural heritage"
-    await generate_image(ctx, prompt)
+    country_name = ' '.join(args).lower()
+    
+    # إذا كانت الدولة موجودة في القائمة الذكية
+    if country_name in country_landmarks:
+        await generate_image(ctx, country_landmarks[country_name])
+    else:
+        # إذا لم تكن الدولة في القائمة، ارسم وصف عام
+        await generate_image(ctx, f"The most beautiful landmarks and iconic scenery of {country_name}, famous tourist attractions, beautiful view, cultural heritage")
 
 # أوامر مختصرة واحترافية
 @bot.command()
@@ -104,7 +124,7 @@ async def commands(ctx):
     help_text = """
 **📜 قائمة أوامر البوت:**
 • `!palestine` : رسم المسجد الأقصى وفلسطين
-• `!country [اسم الدولة]` : رسم معالم أي دولة
+• `!country [اسم الدولة]` : رسم معالم أي دولة (بوصف دقيق)
 • `!draw [وصف]` : رسم أي شيء تريده (واقعي)
 • `!portrait [وصف]` : رسم بورتريه شخصي واقعي
 • `!landscape [وصف]` : رسم منظر طبيعي واقعي
