@@ -24,14 +24,13 @@ async def draw(ctx, *args):
         await ctx.send('الرجاء كتابة وصف الصورة. مثال: !draw a beautiful anime landscape')
         return
 
-    prompt = ' '.join(args)
+    prompt = ' '.join(args) + ', photorealistic, ultra realistic, 8k resolution, highly detailed, sharp focus, cinematic lighting'
     encoded_prompt = urllib.parse.quote(prompt)
 
     msg = await ctx.send(f'⏳ جاري رسم: {prompt}...')
 
     try:
-        url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&nologo=true'
-        
+        url = f'https://image.pollinations.ai/prompt/{encoded_prompt}?width=1024&height=768&nologo=true&model=flux'
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=120) as response:
             data = response.read()
