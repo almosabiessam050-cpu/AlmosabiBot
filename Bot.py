@@ -25,7 +25,6 @@ async def generate_image(ctx, prompt, extra_style=""):
     msg = await ctx.send(f'⏳ جاري رسم: {prompt}...')
     
     try:
-        # إضافة كلمات الواقعية والاحترافية تلقائياً
         full_prompt = f"{prompt}, {extra_style}, photorealistic, ultra realistic, 8k resolution, highly detailed, sharp focus, cinematic lighting, professional photography, depth of field, dramatic shadows"
         
         url = f'https://image.pollinations.ai/prompt/{urllib.parse.quote(full_prompt)}?width=1024&height=1024&nologo=true'
@@ -44,13 +43,28 @@ async def generate_image(ctx, prompt, extra_style=""):
         await msg.delete()
         await ctx.send(f'حدث خطأ أثناء توليد الصورة: {e}')
 
-# أمر الرسم العام (واقعي)
+# أمر الرسم العام
 @bot.command()
 async def draw(ctx, *args):
     if not args:
         await ctx.send('الرجاء كتابة وصف الصورة. مثال: !draw a beautiful woman')
         return
     prompt = ' '.join(args)
+    await generate_image(ctx, prompt)
+
+# أمر رسم فلسطين
+@bot.command()
+async def palestine(ctx):
+    await generate_image(ctx, "The Al-Aqsa Mosque in Jerusalem, golden dome, beautiful Palestinian landscape, ancient stone walls, olive trees, warm sunset lighting, breathtaking view")
+
+# أمر رسم الدول
+@bot.command()
+async def country(ctx, *args):
+    if not args:
+        await ctx.send('الرجاء كتابة اسم الدولة. مثال: !country Egypt')
+        return
+    country_name = ' '.join(args)
+    prompt = f"The most beautiful landmarks and iconic scenery of {country_name}, famous tourist attractions, beautiful view, cultural heritage"
     await generate_image(ctx, prompt)
 
 # أوامر مختصرة واحترافية
@@ -84,11 +98,13 @@ async def space(ctx, *args):
     prompt = ' '.join(args) if args else 'a stunning galaxy'
     await generate_image(ctx, prompt, "astrophotography")
 
-# أمر المساعدة (بدون تعارض)
+# أمر المساعدة
 @bot.command()
 async def commands(ctx):
     help_text = """
-**📜 قائمة أوامر البوت الواقعية:**
+**📜 قائمة أوامر البوت:**
+• `!palestine` : رسم المسجد الأقصى وفلسطين
+• `!country [اسم الدولة]` : رسم معالم أي دولة
 • `!draw [وصف]` : رسم أي شيء تريده (واقعي)
 • `!portrait [وصف]` : رسم بورتريه شخصي واقعي
 • `!landscape [وصف]` : رسم منظر طبيعي واقعي
