@@ -116,6 +116,38 @@ async def space(ctx, *args):
     prompt = ' '.join(args) if args else 'a stunning galaxy'
     await generate_image(ctx, prompt, "astrophotography")
 
+@bot.command()
+async def cat(ctx):
+    await generate_image(ctx, "a cute fluffy cat, realistic")
+
+@bot.command()
+async def dog(ctx):
+    await generate_image(ctx, "a cute golden retriever dog, realistic")
+
+@bot.command()
+async def robot(ctx):
+    await generate_image(ctx, "a futuristic robot, high tech, realistic")
+
+@bot.command()
+async def food(ctx, *args):
+    prompt = ' '.join(args) if args else 'a delicious burger'
+    await generate_image(ctx, prompt, "food photography")
+
+@bot.command()
+async def house(ctx, *args):
+    prompt = ' '.join(args) if args else 'a beautiful modern house'
+    await generate_image(ctx, prompt, "architectural photography")
+
+@bot.command()
+async def nature(ctx, *args):
+    prompt = ' '.join(args) if args else 'a beautiful forest with sunlight'
+    await generate_image(ctx, prompt, "nature photography")
+
+@bot.command()
+async def ocean(ctx, *args):
+    prompt = ' '.join(args) if args else 'a beautiful tropical ocean'
+    await generate_image(ctx, prompt, "underwater photography")
+
 # أمر المساعدة
 @bot.command()
 async def commands(ctx):
@@ -130,6 +162,13 @@ async def commands(ctx):
 • `!city [وصف]` : رسم مدينة
 • `!car [وصف]` : رسم سيارة
 • `!space [وصف]` : رسم الفضاء
+• `!cat` : رسم قطة
+• `!dog` : رسم كلب
+• `!robot` : رسم روبوت
+• `!food [وصف]` : رسم طعام
+• `!house [وصف]` : رسم منزل
+• `!nature [وصف]` : رسم طبيعة
+• `!ocean [وصف]` : رسم محيط
 • `!ping` : اختبار اتصال البوت
     """
     await ctx.send(help_text)
