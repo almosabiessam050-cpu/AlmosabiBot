@@ -12,7 +12,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True
-intents.members = True  # لتفعيل الترحيب بالأعضاء
+intents.members = True
 
 bot = commands.Bot(command_prefix='!', intents=intents)
 
@@ -80,7 +80,7 @@ async def on_member_join(member):
         await channel.send(f"🎉 مرحباً بك يا {member.mention} في السيرفر! نتمنى لك وقتاً ممتعاً!")
 
 # حذف الرسائل المسيئة
-bad_words = ["سب", "شتم"]  # أضف الكلمات التي تريد حظرها هنا
+bad_words = ["سب", "شتم"]
 
 @bot.event
 async def on_message(message):
@@ -210,7 +210,7 @@ async def quote(ctx):
     ]
     await ctx.send(random.choice(quotes))
 
-# أوامر الميزات الجديدة (محسنة)
+# أمر الطقس
 @bot.command()
 async def weather(ctx, *args):
     if not args:
@@ -218,14 +218,35 @@ async def weather(ctx, *args):
         return
     city = ' '.join(args)
     try:
-        url = f"https://wttr.in/{urllib.parse.quote(city)}?format=3"
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
-        with urllib.request.urlopen(req, timeout=15) as response:
-            weather_info = response.read().decode()
-        await ctx.send(f"🌤️ {weather_info}")
-    except Exception:
+        # استخدام خدمة Open-Meteo للطقس (أكثر دقة وموثوقية)
+        # أولاً: البحث عن إحداثيات المدينة
+        geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={urllib.parse.quote(city)}&count=1&language=ar&format=json"
+        geo_req = urllib.request.Request(geo_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(geo_req, timeout=15) as response:
+            geo_data = json.loads(response.read())
+        
+        if not geo_data['results']:
+            await ctx.send(f"عذراً، لم أجد مدينة باسم {city}")
+            return
+        
+        latitude = geo_data['results'][0]['latitude']
+        longitude = geo_data['results'][0]['longitude']
+        
+        # ثانياً: الحصول على الطقس
+        weather_url = f"https://api.open-meteo.com/v1/forecast?latitude={latitude}&longitude={longitude}&current_weather=true"
+        weather_req = urllib.request.Request(weather_url, headers={'User-Agent': 'Mozilla/5.0'})
+        with urllib.request.urlopen(weather_req, timeout=15) as response:
+            weather_data = json.loads(response.read())
+        
+        temperature = weather_data['current_weather']['temperature']
+        wind_speed = weather_data['current_weather']['windspeed']
+        
+        await ctx.send(f"🌤️ الطقس في {city}:\n🌡️ درجة الحرارة: {temperature} درجة مئوية\n💨 سرعة الرياح: {wind_speed} كم/ساعة")
+        
+    except Exception as e:
         await ctx.send(f"عذراً، لم أستطع معرفة الطقس في {city}")
 
+# أوامر إضافية
 @bot.command()
 async def gif(ctx, *args):
     if not args:
@@ -233,7 +254,6 @@ async def gif(ctx, *args):
         return
     prompt = ' '.join(args)
     try:
-        # استخدام خدمة مجانية للصور المتحركة
         url = f"https://api.tenor.com/v1/search?q={urllib.parse.quote(prompt)}&key=LIVDSRZULELA&limit=1"
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
         with urllib.request.urlopen(req, timeout=15) as response:
