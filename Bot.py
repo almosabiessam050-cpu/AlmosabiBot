@@ -30,7 +30,7 @@ async def draw(ctx, *args):
     msg = await ctx.send(f'⏳ جاري رسم: {prompt}...')
 
     try:
-        # استخدام خدمة مجانية
+        # استخدام خدمة الرسم المجانية (Pollinations)
         url = f'https://image.pollinations.ai/prompt/{urllib.parse.quote(prompt)}?width=1024&height=768&nologo=true'
         
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0'})
