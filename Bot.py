@@ -2,10 +2,10 @@ import discord
 from discord.ext import commands
 import urllib.request
 import urllib.parse
+import os
 
-# ضع التوكن الجديد هنا
-TOKEN = 'import os
-TOKEN = os.getenv('DISCORD_TOKEN')'
+# ضع التوكن هنا
+TOKEN = os.getenv('DISCORD_TOKEN')
 
 intents = discord.Intents.default()
 intents.message_content = True
