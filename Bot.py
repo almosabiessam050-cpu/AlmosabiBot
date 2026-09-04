@@ -19,6 +19,10 @@ async def on_ready():
     print(f'تم تشغيل البوت: {bot.user}')
 
 @bot.command()
+async def ping(ctx):
+    await ctx.send('Pong!')
+
+@bot.command()
 async def draw(ctx, *args):
     if not args:
         await ctx.send('الرجاء كتابة وصف الصورة. مثال: !draw a realistic portrait')
@@ -30,21 +34,18 @@ async def draw(ctx, *args):
     try:
         # استخدام Stability AI API
         url = "https://api.stability.ai/v2beta/stable-image/generate/core"
-        headers = {
-            "Authorization": f"Bearer {STABILITY_API_KEY}",
-            "Accept": "image/*"
-        }
-        # إرسال الطلب بصيغة Form-Data
-        boundary = '----WebKitFormBoundary7MA4YWxkTrZu0gW'
-        body = f'--{boundary}\r\nContent-Disposition: form-data; name="prompt"\r\n\r\n{prompt}\r\n--{boundary}\r\nContent-Disposition: form-data; name="aspect_ratio"\r\n\r\n3:2\r\n--{boundary}--\r\n'
+        data = urllib.parse.urlencode({
+            "prompt": prompt,
+            "aspect_ratio": "3:2"
+        }).encode()
         
-        req = urllib.request.Request(url, data=body.encode(), headers={
+        req = urllib.request.Request(url, data=data, headers={
             "Authorization": f"Bearer {STABILITY_API_KEY}",
-            "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "Content-Type": "application/x-www-form-urlencoded",
             "Accept": "image/*"
         })
         
-        with urllib.request.urlopen(req, timeout=120) as response:
+        with urllib.request.urlopen(req, timeout=180) as response:
             image_data = response.read()
         
         # حفظ الصورة وإرسالها
