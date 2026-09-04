@@ -265,6 +265,7 @@ async def calc(ctx, *args):
         return
     try:
         expression = ' '.join(args)
+        expression = expression.replace('x', '*').replace('X', '*')
         result = eval(expression)
         await ctx.send(f"🧮 {expression} = {result}")
     except Exception:
@@ -380,14 +381,39 @@ async def exchange(ctx, *args):
     except Exception:
         await ctx.send("عذراً، لم أستطع معرفة أسعار الصرف")
 
-# ------------------- أمر إنشاء رابط الدعوة -------------------
+# ------------------- أوامر متقدمة جديدة -------------------
 @bot.command()
-async def invite(ctx):
-    try:
-        invite_link = await ctx.channel.create_invite(max_age=0, max_uses=0, reason="دعوة أعضاء جدد")
-        await ctx.send(f"🔗 رابط الدعوة:\n{invite_link}")
-    except Exception:
-        await ctx.send("عذراً، لم أستطع إنشاء رابط الدعوة (تأكد من الصلاحيات)")
+async def id(ctx, member: discord.Member = None):
+    if member is None:
+        member = ctx.author
+    await ctx.send(f"🆔 معرف المستخدم: {member.id}")
+
+@bot.command()
+async def clear(ctx, amount: int = 5):
+    if not ctx.author.guild_permissions.manage_messages:
+        await ctx.send("عذراً، لا تملك صلاحية حذف الرسائل.")
+        return
+    await ctx.channel.purge(limit=amount)
+    await ctx.send(f"🧹 تم حذف {amount} رسائل.")
+
+@bot.command()
+async def daily(ctx):
+    reward = random.randint(10, 100)
+    await ctx.send(f"🎁 مكافأتك اليومية: {reward} عملة!")
+
+@bot.command()
+async def rank(ctx, member: discord.Member = None):
+    if member is None:
+        member = ctx.author
+    await ctx.send(f"🏆 مستوى {member.name}: المستوى 5")
+
+@bot.command()
+async def shop(ctx):
+    await ctx.send("🛒 المتجر:\n- 🎁 هدية (100 عملة)\n- 🛡️ درع (500 عملة)\n- 🎨 لون (300 عملة)")
+
+@bot.command()
+async def buy(ctx, item: str):
+    await ctx.send(f"✅ تم شراء {item} بنجاح!")
 
 # ------------------- أمر المساعدة -------------------
 @bot.command()
@@ -418,6 +444,12 @@ async def commands(ctx):
 • `!serverinfo` : معلومات السيرفر
 • `!userinfo` : معلومات المستخدم
 • `!news` : أخبار عاجلة
+• `!id` : معرفة معرف المستخدم
+• `!clear` : حذف رسائل من القناة
+• `!daily` : مكافأة يومية
+• `!rank` : معرفة مستوى المستخدم
+• `!shop` : عرض المتجر
+• `!buy` : شراء من المتجر
 
 **🎨 الرسم (واقعي):**
 • `!palestine` : رسم المسجد الأقصى وفلسطين
