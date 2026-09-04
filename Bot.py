@@ -56,43 +56,37 @@ async def draw(ctx, *args):
 # أوامر مختصرة واحترافية
 @bot.command()
 async def portrait(ctx, *args):
-    # رسم بورتريه (صورة شخصية) واقعي
     prompt = ' '.join(args) if args else 'a beautiful woman'
     await generate_image(ctx, prompt, "professional portrait")
 
 @bot.command()
 async def landscape(ctx, *args):
-    # رسم منظر طبيعي واقعي
     prompt = ' '.join(args) if args else 'a breathtaking mountain landscape'
     await generate_image(ctx, prompt, "epic landscape")
 
 @bot.command()
 async def animal(ctx, *args):
-    # رسم حيوان واقعي
     prompt = ' '.join(args) if args else 'a majestic lion'
     await generate_image(ctx, prompt, "wildlife photography")
 
 @bot.command()
 async def city(ctx, *args):
-    # رسم مدينة واقعية
     prompt = ' '.join(args) if args else 'a futuristic city at night'
     await generate_image(ctx, prompt, "cyberpunk city")
 
 @bot.command()
 async def car(ctx, *args):
-    # رسم سيارة واقعية
     prompt = ' '.join(args) if args else 'a luxury sports car'
     await generate_image(ctx, prompt, "automotive photography")
 
 @bot.command()
 async def space(ctx, *args):
-    # رسم الفضاء الخارجي بشكل واقعي
     prompt = ' '.join(args) if args else 'a stunning galaxy'
     await generate_image(ctx, prompt, "astrophotography")
 
-# أمر المساعدة
+# أمر المساعدة (بدون تعارض)
 @bot.command()
-async def help(ctx):
+async def commands(ctx):
     help_text = """
 **📜 قائمة أوامر البوت الواقعية:**
 • `!draw [وصف]` : رسم أي شيء تريده (واقعي)
