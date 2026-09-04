@@ -4,7 +4,8 @@ import urllib.request
 import urllib.parse
 
 # ضع التوكن الجديد هنا
-TOKEN = 'ضع_التوكن_الجديد_هنا_في_Railway'
+TOKEN = 'import os
+TOKEN = os.getenv('DISCORD_TOKEN')'
 
 intents = discord.Intents.default()
 intents.message_content = True
